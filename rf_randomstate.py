@@ -29,7 +29,7 @@ for i, random_state in enumerate(random_states):
     X_train, X_test, Y_Train, y_test = train_test_split(data["Text"], data["Label"], test_size=0.2, random_state=random_state)
 
     # Vectorize text data using CountVectorizer
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(max_features=300)
     X_train_vectorized = vectorizer.fit_transform(X_train)
     X_test_vectorized = vectorizer.transform(X_test)
 
@@ -42,7 +42,7 @@ for i, random_state in enumerate(random_states):
     }
 
     # Create a Random Forest classifier
-    rf_classifier  = RandomForestClassifier()
+    rf_classifier  = RandomForestClassifier(max_features=300)
 
     # Create a GridSearchCV object to find the best hyperparameters
     grid_search_rf = GridSearchCV(rf_classifier, param_grid_rf, cv=5)
@@ -50,7 +50,7 @@ for i, random_state in enumerate(random_states):
 
     # Save the results to a CSV file
     results_df = pd.DataFrame(grid_search_rf.cv_results_)
-    results_df.to_csv(f'rf_grid_search_randomsplit{random_state}.csv', index=False)
+    results_df.to_csv(f'new_rf_grid_search_randomsplit{random_state}.csv', index=False)
     # Get the best hyperparameters
     best_params_rf = grid_search_rf.best_params_
     print(best_params)
@@ -117,7 +117,7 @@ metrics_df = pd.DataFrame({
 })
 
 # Save the DataFrame to a CSV file
-metrics_df.to_csv('rf_metrics_scores.csv', index=False)
+metrics_df.to_csv('new_rf_metrics_scores.csv', index=False)
 
 lower_bound_precision = np.percentile(precision_scores, 2.5)
 upper_bound_precision = np.percentile(precision_scores, 97.5)

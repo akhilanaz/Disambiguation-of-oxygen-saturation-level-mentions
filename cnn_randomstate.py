@@ -3,13 +3,12 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix
-import matplotlib.pyplot as plt
 from keras.preprocessing.text import Tokenizer
 from keras.models import Model
 from keras.layers import Conv1D, GlobalMaxPooling1D, Dense, Input, Embedding, Activation
 from keras.wrappers.scikit_learn import KerasClassifier
 from keras.utils import pad_sequences
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import math
 from bioinfokit.visuz import cluster
 from sklearn.manifold import TSNE
@@ -59,10 +58,10 @@ for i, random_state in enumerate(random_states):
     reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=7, verbose=1, epsilon=1e-4, mode='min')
 
 
-    def create_model(learn_rate=0.001, batch_size=128, epochs=10, filters=100):
+    def create_model(learn_rate=0.001, batch_size=128):
         inputs = Input(name='inputs', shape=[max_len])
         layer = Embedding(max_word, 300, input_length=max_len)(inputs)
-        layer = Conv1D(filters, kernel_size=3, activation='relu')(layer)
+        layer = Conv1D(300, kernel_size=5, activation='relu')(layer)
         layer = GlobalMaxPooling1D()(layer)
         layer = Dense(1, name='out_layer')(layer)
         layer = Activation('sigmoid')(layer)
@@ -76,21 +75,19 @@ for i, random_state in enumerate(random_states):
     # Define the grid search parameters
     param_grid = {
         'learn_rate': [0.001, 0.01],
-        'batch_size': [64, 128],
-        'epochs': [10,20],
-        'filters': [100, 200]
+        'batch_size': [64, 128]
     }
 
     # Create the grid search
     grid_search_cnn = GridSearchCV(estimator=keras_clf, param_grid=param_grid, scoring='accuracy', cv=5, verbose=1)
 
     # Fit the grid search
-    grid_search_cnn.fit(train_sequences_matrix, Y_train, validation_data=(Val_sequences_matrix, Y_val),
+    grid_search_cnn.fit(train_sequences_matrix, Y_train, epochs=10, batch_size =128, validation_data=(Val_sequences_matrix, Y_val),
                          callbacks=[earlyStopping, reduce_lr_loss])
 
     # Save the results to a CSV file
     results_df = pd.DataFrame(grid_search_cnn.cv_results_)
-    results_df.to_csv(f'cnn_grid_search_randomsplit{random_state}.csv', index=False)
+    results_df.to_csv(f'new_new_cnn_grid_search_randomsplit{random_state}.csv', index=False)
 
     # Get the best hyperparameters
     best_params = grid_search_cnn.best_params_
@@ -171,7 +168,7 @@ metrics_df = pd.DataFrame({
 })
 
 # Save the DataFrame to a CSV file
-metrics_df.to_csv('CNN_metrics_scores.csv', index=False)
+metrics_df.to_csv('new_new_CNN_metrics_scores.csv', index=False)
 
 lower_bound_precision = np.percentile(precision_scores, 2.5)
 upper_bound_precision = np.percentile(precision_scores, 97.5)

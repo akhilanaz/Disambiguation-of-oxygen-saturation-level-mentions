@@ -58,7 +58,7 @@ for i, random_state in enumerate(random_states):
     reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=7, verbose=1, epsilon=1e-4, mode='min')
 
 
-    def create_model(learn_rate=0.001, batch_size=128, epochs=10, filters=100):
+    def create_model(learn_rate=0.001, batch_size=128):
         inputs = Input(name='inputs', shape=[max_len])
         layer = Embedding(max_word, 300, input_length=max_len)(inputs)
         layer = Bidirectional(LSTM(128, dropout=0.5, recurrent_dropout=0.2))(layer)
@@ -74,16 +74,14 @@ for i, random_state in enumerate(random_states):
     # Define the grid search parameters
     param_grid = {
         'learn_rate': [0.001, 0.01],
-        'batch_size': [64, 128],
-        'epochs': [10, 15],
-        'filters': [100, 200]
+        'batch_size': [64, 128]
     }
 
     # Create the grid search
     grid_search_lstm = GridSearchCV(estimator=keras_clf, param_grid=param_grid, scoring='accuracy', cv=5, verbose=1)
 
     # Fit the grid search
-    grid_search_lstm.fit(train_sequences_matrix, Y_train, validation_data=(Val_sequences_matrix, Y_val),
+    grid_search_lstm.fit(train_sequences_matrix, Y_train,epochs=20, validation_data=(Val_sequences_matrix, Y_val),
                          callbacks=[earlyStopping, reduce_lr_loss])
 
     # Save the results to a CSV file

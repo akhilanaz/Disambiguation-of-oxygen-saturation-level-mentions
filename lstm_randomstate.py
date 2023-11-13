@@ -18,7 +18,6 @@ data = pd.read_csv('D:/OxygenStatus/covid_data_finalised.csv', usecols=[0, 1], n
 
 # Specify the number of random state values and iterations
 random_states = [509, 906, 331, 172, 729, 250, 762, 629, 926, 392]
-
 # Initialize lists to store evaluation metrics for each iteration
 precision_scores = []
 recall_scores = []
@@ -58,7 +57,7 @@ for i, random_state in enumerate(random_states):
     reduce_lr_loss = ReduceLROnPlateau(monitor='val_loss', factor=0.1, patience=7, verbose=1, epsilon=1e-4, mode='min')
 
 
-    def create_model(learn_rate=0.001, batch_size=128, epochs=10, filters=100):
+    def create_model(learn_rate=0.001, batch_size=128):
         inputs = Input(name='inputs', shape=[max_len])
         layer = Embedding(max_word, 300, input_length=max_len)(inputs)
         layer = LSTM(128, dropout=0.5, recurrent_dropout=0.2)(layer)
@@ -73,17 +72,15 @@ for i, random_state in enumerate(random_states):
 
     # Define the grid search parameters
     param_grid = {
-        'learn_rate': [0.001, 0.01, 0.1],
-        'batch_size': [64, 128, 256],
-        'epochs': [10, 20, 30],
-        'filters': [100, 200, 300]
+        'learn_rate': [0.001, 0.01],
+        'batch_size': [64, 128]
     }
 
     # Create the grid search
     grid_search_lstm = GridSearchCV(estimator=keras_clf, param_grid=param_grid, scoring='accuracy', cv=5, verbose=1)
 
     # Fit the grid search
-    grid_search_lstm.fit(train_sequences_matrix, Y_train, validation_data=(Val_sequences_matrix, Y_val),
+    grid_search_lstm.fit(train_sequences_matrix, Y_train, epochs=10, validation_data=(Val_sequences_matrix, Y_val),
                          callbacks=[earlyStopping, reduce_lr_loss])
 
     # Save the results to a CSV file
@@ -153,8 +150,8 @@ metrics_df = pd.DataFrame({
     'prediction_time': prediction_times
 })
 
-# Save the DataFrame to a CSV file
-metrics_df.to_csv('LSTM_metrics_scores.csv', index=False)
+# # Save the DataFrame to a CSV file
+# metrics_df.to_csv('LSTM_metrics_scores.csv', index=False)
 
 lower_bound_precision = np.percentile(precision_scores, 2.5)
 upper_bound_precision = np.percentile(precision_scores, 97.5)
