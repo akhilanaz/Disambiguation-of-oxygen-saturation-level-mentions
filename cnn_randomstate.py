@@ -197,6 +197,28 @@ print("Best Precision:", best_precision)
 print("Best Recall:", recall_scores[best_iteration])
 print("Best F1 Score:", f1_scores[best_iteration])
 
+from keras import backend as K
+# Extract embeddings from the encoded layer for the test data
+encoded_layer_index = 1  # Assuming the encoded layer is the second layer
+encoded_layer = best_model.layers[encoded_layer_index]
+get_embeddings = K.function([best_model.layers[0].input], [encoded_layer.output])
+X_test_embeddings = get_embeddings([X_test])[0]
+
+X_test_flattened = X_test_embeddings.reshape((X_test_embeddings.shape[0], -1))
+# Apply t-SNE on the encoded representations
+tsne = TSNE(n_components=2, perplexity=30, random_state=42)
+X_tsne = tsne.fit_transform(X_test_flattened)
+# Separate the data points based on class labels
+class_0 = X_tsne[Y_test == 0]
+class_1 = X_tsne[Y_test == 1]
+# Plot each class with a different color
+plt.scatter(class_0[:, 0], class_0[:, 1], c='darkred', label='Class 0')
+plt.scatter(class_1[:, 0], class_1[:, 1], c='darkgreen', label='Class 1')
+plt.title('t-SNE Visualization of Test Data')
+plt.legend()
+plt.show()
+
+
 # Print the confusion matrix for the best iteration
 print('Confusion Matrix for the Best Model (Iteration {}):'.format(best_iteration + 1))
 print(best_conf_matrix)
