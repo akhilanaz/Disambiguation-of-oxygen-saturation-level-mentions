@@ -152,3 +152,4 @@ X_tsne = tsne.fit_transform(X_test_vectorized.toarray())
 plt.scatter(X_tsne[:,0], X_tsne[:,1], c=y_test.values)
 plt.show()
 
+ 
