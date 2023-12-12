@@ -183,3 +183,62 @@ print("Best F1 Score:", f1_scores[best_iteration])
 # Print the confusion matrix for the best iteration
 print('Confusion Matrix for the Best Model (Iteration {}):'.format(best_iteration + 1))
 print(best_conf_matrix)
+
+# LIME Explanation
+explainer = LimeTextExplainer(class_names=["0", "1"])
+explanations = []
+top_features = 10
+
+# Separate lists to store positive-weighted features for each class
+class_0_positive_features = []
+class_1_positive_features = []
+# Function to predict using the CNN model
+def predict_fn(X_Test):
+    data_sequences = tok.texts_to_sequences(X_Test)
+    X_test_seq = pad_sequences(data_sequences, maxlen=max_len)
+    return cnn_model.predict(X_test_seq)
+
+
+
+# Generate explanations for each class for the first 5 instances in X_Test
+explanations = []
+top_features = 10
+
+# Separate lists to store positive-weighted features for each class
+class_0_positive_features = []
+class_1_positive_features = []
+
+for class_label in [1,0]:
+    explanation_list = []
+    for i in range(len(X_Test)):
+        print(i)
+        print(X_Test.iloc[i])
+        exp = explainer.explain_instance(X_Test.iloc[i], predict_fn,num_features=top_features, labels=[class_label])
+
+        print(exp)
+        # Extract positive-weighted features and sort them
+        positive_features = [(feature, weight) for feature, weight in exp.as_list(label=class_label) if weight > 0]
+        sorted_positive_features = sorted(positive_features, key=lambda x: x[1], reverse=True)
+
+        # negative_features = [(feature, weight) for feature, weight in exp.as_list(label=class_label) if weight < 0]
+        # sorted_negative_features = sorted(negative_features, key=lambda x: x[1], reverse=True)
+        # Keep only the top 10 positive-weighted features
+        top_positive_features_list = sorted_positive_features[:top_features]
+        explanation_list.append(top_positive_features_list)
+
+        # Store positive-weighted features separately for each class
+        if class_label == 0:
+            class_1_positive_features.extend(top_positive_features_list)
+        else:
+            class_0_positive_features.extend(top_positive_features_list)
+
+    explanations.append(explanation_list)
+
+
+# Convert the lists to DataFrames
+df_class_0 = pd.DataFrame(class_0_positive_features, columns=['Feature', 'Weight'])
+df_class_1 = pd.DataFrame(class_1_positive_features, columns=['Feature', 'Weight'])
+
+# Save DataFrames to CSV files
+df_class_0.to_csv('class_0_positive_features_lstm.csv', index=False)
+df_class_1.to_csv('class_1_positive_features_lstm.csv', index=False)
