@@ -153,24 +153,17 @@ metrics_df = pd.DataFrame({
 # # Save the DataFrame to a CSV file
 # metrics_df.to_csv('LSTM_metrics_scores.csv', index=False)
 
-lower_bound_precision = np.percentile(precision_scores, 2.5)
-upper_bound_precision = np.percentile(precision_scores, 97.5)
-lower_bound_recall = np.percentile(recall_scores, 2.5)
-upper_bound_recall = np.percentile(recall_scores, 97.5)
-lower_bound_f1_score = np.percentile(f1_scores, 2.5)
-upper_bound_f1_score = np.percentile(f1_scores, 97.5)
-
 # Calculate the mean prediction time
 mean_prediction_time = np.mean(prediction_times)
 print(f"Average Prediction Time: {mean_prediction_time} seconds")
 
 # Print the results
 print(
-    f'Precision: Mean={mean_precision}, Std={std_precision}, St_error= {std_precision / math.sqrt(10)}, CI={lower_bound_precision, upper_bound_precision}')
+    f'Precision: Mean={mean_precision}, Std={std_precision}, St_error= {std_precision / math.sqrt(10)}, CI={mean_precision - St_error*1.96, mean_precision + St_error*1.96}')
 print(
-    f'Recall: Mean={mean_recall}, Std={std_recall}, St_error= {std_recall / math.sqrt(10)},CI={lower_bound_recall, upper_bound_recall}')
+    f'Recall: Mean={mean_recall}, Std={std_recall}, St_error= {std_recall / math.sqrt(10)}, CI={mean_recall - St_error*1.96, mean_recall + St_error*1.96}')
 print(
-    f'F1 Score: Mean={mean_f1}, Std={std_f1}, St_error= {std_f1 / math.sqrt(10)}, CI={lower_bound_f1_score, upper_bound_f1_score}')
+    f'F1 Score: Mean={mean_f1}, Std={std_f1}, St_error= {std_f1 / math.sqrt(10)}, CI={mean_f1 - St_error*1.96, mean_f1 + St_error*1.96}')
 
 best_iteration = np.argmax(precision_scores)
 # Print the best hyperparameters
