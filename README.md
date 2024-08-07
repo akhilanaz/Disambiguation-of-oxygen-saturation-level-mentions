@@ -22,3 +22,5 @@ LIME provided qualitative explanations for the model performance by highlighting
 **Requirements**
 Python 3.x
 Required packages are listed in requirements.txt.
+
+Journal: Abdulnazar, A., Kugic, A., Schulz, S. et al. O2 supplementation disambiguation in clinical narratives to support retrospective COVID-19 studies. BMC Med Inform Decis Mak 24, 29 (2024). https://doi.org/10.1186/s12911-024-02425-2
